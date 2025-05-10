@@ -1,5 +1,5 @@
-## [Unreleased]
+# Change Log of PXMyPortal gem
 
-## [0.1.0] - 2025-05-10
+## 0.0.1 - 2025-05-10
 
 - Initial release
