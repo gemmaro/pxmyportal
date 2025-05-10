@@ -1,8 +1,7 @@
-# Pxmyportal
+# PXMyPortal
 
-TODO: Delete this and the text below, and describe your gem
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pxmyportal`. To experiment with that code, run `bin/console` for an interactive prompt.
+このgemは[PXマイポータル](https://www.tkc.jp/pxmyportal/)のコマンドラインツールpxmyportalを提供します。
+現時点で給与明細書のダウンロードを行えます。
 
 ## Installation
 
@@ -18,7 +17,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+環境変数`PXMYPORTAL_COMPANY`、`PXMYPORTAL_USER`、`PXMYPORTAL_PASSWORD`の指定が必要です。
 
 ## Development
 
@@ -29,3 +28,20 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/gemmaro/pxmyportal.
+
+## License
+
+Copyright (C) 2025  gemmaro
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

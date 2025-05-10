@@ -2,10 +2,10 @@
 
 require "test_helper"
 
-class PxmyportalTest < Test::Unit::TestCase
+class PXMyPortalTest < Test::Unit::TestCase
   test "VERSION" do
     assert do
-      ::Pxmyportal.const_defined?(:VERSION)
+      ::PXMyPortal.const_defined?(:VERSION)
     end
   end
 
