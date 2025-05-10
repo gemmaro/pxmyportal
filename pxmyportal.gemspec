@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ["gemmaro.dev@gmail.com"]
 
   spec.summary = "PXまいポータルのコマンドラインツール"
-  spec.description = "このgemはPXマイポータルのコマンドラインツールpxmyportalを提供します。現時点で給与明細書のダウンロードを行えます。"
+  spec.description = "このgemはPXまいポータルのコマンドラインツールpxmyportalを提供します。現時点で給与明細書のダウンロードを行えます。"
   spec.license = "GPL-3.0-or-later"
 
   spec.required_ruby_version = ">= 3.0.0"

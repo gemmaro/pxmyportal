@@ -1,6 +1,6 @@
 # PXMyPortal
 
-このgemは[PXマイポータル](https://www.tkc.jp/pxmyportal/)のコマンドラインツールpxmyportalを提供します。
+このgemは[PXまいポータル](https://www.tkc.jp/pxmyportal/)のコマンドラインツールpxmyportalを提供します。
 現時点で給与明細書のダウンロードを行えます。
 
 ## Installation
