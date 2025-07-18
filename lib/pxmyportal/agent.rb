@@ -137,7 +137,7 @@ class PXMyPortal::Agent
 
   def initialize(debug: false,
                  cookie_jar_path: "pxmyportal.cookie-jar",
-                 payslips_path: "payslips.yaml",
+                 payslips_path: File.join(ENV["XDG_DATA_HOME"], "pxmyportal", "payslips.yaml"),
                  company:,
                  user:,
                  password:,
