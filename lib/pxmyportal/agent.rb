@@ -22,6 +22,7 @@ require_relative "payslip"
 class PXMyPortal::Agent
   PAYSLIP_PAGE_PATH_SAMPLE = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslipSample")
   PAYSLIP_PAGE_PATH_NORMAL = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslip")
+  CACHE_DIR = File.join(ENV["XDG_CACHE_HOME"], "pxmyportal")
 
   def let_redirect
     token = request_verification_token
@@ -37,7 +38,7 @@ class PXMyPortal::Agent
     begin
       response => Net::HTTPFound
     rescue => e
-      File.write(File.join(ENV["XDG_CACHE_HOME"], "pxmyportal", "debug", "let_redirect.html"), response.body)
+      File.write(File.join(CACHE_DIR, "debug", "let_redirect.html"), response.body)
       raise e
     end
 
@@ -136,7 +137,7 @@ class PXMyPortal::Agent
   end
 
   def initialize(debug: false,
-                 cookie_jar_path: "pxmyportal.cookie-jar",
+                 cookie_jar_path: File.join(CACHE_DIR, "cookie-jar"),
                  payslips_path: File.join(ENV["XDG_DATA_HOME"], "pxmyportal", "payslips.yaml"),
                  company:,
                  user:,
