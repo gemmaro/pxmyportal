@@ -24,6 +24,7 @@ require_relative "error"
 class PXMyPortal::Agent
   PAYSLIP_PAGE_PATH_SAMPLE = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslipSample")
   PAYSLIP_PAGE_PATH_NORMAL = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslip")
+  PAYSLIP_PAGE_PATH_BONUS = File.join(PXMyPortal::CLIENT_BASEPATH, "BonusPayslip")
   CACHE_DIR = File.join(ENV["XDG_CACHE_HOME"], "pxmyportal")
 
   def let_redirect
@@ -49,6 +50,8 @@ class PXMyPortal::Agent
       @phase = :sample
     when PAYSLIP_PAGE_PATH_NORMAL
       @phase = :normal
+    when PAYSLIP_PAGE_PATH_BONUS
+      @phase = :bonus
     else
       raise PXMyPortal::Error, "unexpected location #{location}"
     end
@@ -85,7 +88,8 @@ class PXMyPortal::Agent
 
   def payslip_page_path
     @payslip_page_path ||= { sample: PAYSLIP_PAGE_PATH_SAMPLE,
-                             normal: PAYSLIP_PAGE_PATH_NORMAL }[@phase]
+                             normal: PAYSLIP_PAGE_PATH_NORMAL,
+                             bonus: PAYSLIP_PAGE_PATH_BONUS }[@phase]
   end
 
   def payslips
