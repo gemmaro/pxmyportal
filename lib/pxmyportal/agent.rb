@@ -191,9 +191,10 @@ class PXMyPortal::Agent
 
   def cookie_jar_path
     @created_cookie_jar_path and return @created_cookie_jar_path
-    unless Dir.exist?(CACHE_DIR)
+    dir = File.dirname(@cookie_jar_path)
+    unless Dir.exist?(dir)
       @logger.info("creating cache directory")
-      Dir.mkdir(CACHE_DIR)
+      Dir.mkdir(dir)
     end
     @created_cookie_jar_path = @cookie_jar_path
   end
