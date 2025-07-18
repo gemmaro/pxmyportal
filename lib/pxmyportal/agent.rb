@@ -18,6 +18,7 @@ require "net/http"
 require "http-cookie" # Use CGI::Cookie?
 require "nokogiri"
 require_relative "payslip"
+require_relative "error"
 
 class PXMyPortal::Agent
   PAYSLIP_PAGE_PATH_SAMPLE = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslipSample")
@@ -48,7 +49,7 @@ class PXMyPortal::Agent
     when PAYSLIP_PAGE_PATH_NORMAL
       @phase = :normal
     else
-      raise Error, "unexpected location #{location}"
+      raise PXMyPortal::Error, "unexpected location #{location}"
     end
     accept_cookie(response, url: build_url(payslip_page_path))
     self

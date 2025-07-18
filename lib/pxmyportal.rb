@@ -14,7 +14,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 class PXMyPortal
-  Error = Class.new(StandardError)
   HOST = "pxmyportal.tkc.jp"
   BASEPATH = "/pmpwps/"
   CLIENT_BASEPATH = File.join(BASEPATH, "pc/")
