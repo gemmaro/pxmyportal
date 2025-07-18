@@ -29,6 +29,7 @@ class PXMyPortal::Command
     parser.on("--cookie-jar=PATH") { |path| options[:cookie_jar_path] = path }
     parser.on("--payslips=PATH") { |path| options[:payslips_path] = path }
     parser.on("--payslip-dir=PATH") { |path| options[:payslip_dir] = path }
+    parser.on("--bonus-only") { options[:bonus_only] = true }
     parser.parse!
 
     agent = PXMyPortal::Agent.new(**options)

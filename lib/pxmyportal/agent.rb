@@ -142,7 +142,8 @@ class PXMyPortal::Agent
                  user:,
                  password:,
                  test: false,
-                 payslip_dir:)
+                 payslip_dir:,
+                 bonus_only: false)
 
     @company         = company
     @user            = user
@@ -153,6 +154,7 @@ class PXMyPortal::Agent
     @payslips_path   = payslips_path
     @test            = test
     @payslip_dir     = payslip_dir
+    @bonus_only      = bonus_only
   end
 
   def http
