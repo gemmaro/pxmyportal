@@ -17,6 +17,7 @@ require "yaml"
 require "net/http"
 require "http-cookie" # Use CGI::Cookie?
 require "nokogiri"
+require "logger"
 require_relative "payslip"
 require_relative "error"
 
@@ -157,6 +158,8 @@ class PXMyPortal::Agent
     @test            = test
     @payslip_dir     = payslip_dir
     @bonus_only      = bonus_only
+
+    @logger = Logger.new($stderr)
   end
 
   def http
@@ -169,7 +172,16 @@ class PXMyPortal::Agent
 
   def accept_cookie(response, url:)
     response.get_fields("Set-Cookie").each { |value| @jar.parse(value, url) }
-    @jar.save(@cookie_jar_path)
+    @jar.save(cookie_jar_path)
+  end
+
+  def cookie_jar_path
+    @created_cookie_jar_path and return @created_cookie_jar_path
+    unless Dir.exist?(CACHE_DIR)
+      @logger.info("creating cache directory")
+      Dir.mkdir(CACHE_DIR)
+    end
+    @created_cookie_jar_path = @cookie_jar_path
   end
 
   def provide_cookie(request, url:)
