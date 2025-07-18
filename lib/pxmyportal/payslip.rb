@@ -16,7 +16,8 @@
 class PXMyPortal::Payslip
   attr_reader :year_month, :description, :directory
 
-  def initialize(year_month:, description:, key1:, key2:, key3:, directory:)
+  def initialize(year_month:, description:, key1:, key2:, key3:,
+                 directory: File.join(ENV["XDG_DOCUMENTS_DIR"], "pxmyportal"))
     @year_month  = year_month
     @description = description
     @key1        = key1
@@ -48,7 +49,7 @@ class PXMyPortal::Payslip
     "#<Payslip #{year_month.inspect} #{description.inspect}>"
   end
 
-  def self.from_row(row, directory:)
+  def self.from_row(row, directory: nil)
     row.xpath("./td") => [year_month, description, button]
     year_month.xpath(".//text()") => [year_month]
     description.xpath(".//text()") => [description]
@@ -62,9 +63,13 @@ class PXMyPortal::Payslip
     key1 = match[:key1]
     key2 = match[:key2]
     key3 = match[:key3]
+
+    options = {}
+    directory and options[:directory] = directory
+
     new(year_month: year_month.content,
         description: description.content,
         key1:, key2:, key3:,
-        directory:)
+        **options)
   end
 end

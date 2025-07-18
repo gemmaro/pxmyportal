@@ -142,7 +142,7 @@ class PXMyPortal::Agent
                  user:,
                  password:,
                  test: false,
-                 payslip_dir:,
+                 payslip_dir: nil,
                  bonus_only: false)
 
     @company         = company
