@@ -37,7 +37,7 @@ class PXMyPortal::Agent
     begin
       response => Net::HTTPFound
     rescue => e
-      File.write("let_redirect.html", response.body)
+      File.write(File.join(ENV["XDG_CACHE_HOME"], "pxmyportal", "debug", "let_redirect.html"), response.body)
       raise e
     end
 
