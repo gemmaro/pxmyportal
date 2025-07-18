@@ -78,13 +78,23 @@ class PXMyPortal::Agent
       existing_payslips << payslip.metadata
     end
     
-    File.open(@payslips_path, "w") { |file| YAML.dump(existing_payslips, file) } \
+    File.open(payslips_path, "w") { |file| YAML.dump(existing_payslips, file) } \
       unless @test
 
     self
   end
 
   private
+
+  def payslips_path
+    @created_payslips_path and return @created_payslips_path
+    dir = File.dirname(@payslips_path)
+    unless Dir.exist?(dir)
+      @logger.info("creating payslips path...")
+      Dir.mkdir(dir)
+    end
+    @created_payslips_path = @payslips_path
+  end
 
   def payslip_page_path
     @payslip_page_path ||= { sample: PAYSLIP_PAGE_PATH_SAMPLE,
