@@ -16,20 +16,18 @@
 require_relative "xdg"
 
 class PXMyPortal::Payslip
-  attr_reader :year_month, :description, :directory
+  attr_reader :year_month, :description
 
-  def initialize(year_month:, description:, key1:, key2:, key3:,
-                 directory: PXMyPortal::XDG::DOC_DIR)
+  def initialize(year_month:, description:, key1:, key2:, key3:)
     @year_month  = year_month
     @description = description
     @key1        = key1
     @key2        = key2
     @key3        = key3
-    @directory   = directory
   end
 
   def filename
-    @filename ||= File.join(@directory, "#{@key1}-#{@key2}-#{@key3}.pdf")
+    @filename ||= "#{@key1}-#{@key2}-#{@key3}.pdf"
   end
 
   def form_data
@@ -51,7 +49,7 @@ class PXMyPortal::Payslip
     "#<Payslip #{year_month.inspect} #{description.inspect}>"
   end
 
-  def self.from_row(row, directory: nil)
+  def self.from_row(row)
     row.xpath("./td") => [year_month, description, button]
     year_month.xpath(".//text()") => [year_month]
     description.xpath(".//text()") => [description]
@@ -66,12 +64,8 @@ class PXMyPortal::Payslip
     key2 = match[:key2]
     key3 = match[:key3]
 
-    options = {}
-    directory and options[:directory] = directory
-
     new(year_month: year_month.content,
         description: description.content,
-        key1:, key2:, key3:,
-        **options)
+        key1:, key2:, key3:)
   end
 end

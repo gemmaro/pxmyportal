@@ -80,9 +80,10 @@ class PXMyPortal::Agent
         @logger.debug("response") { response.to_hash }
         # response.to_hash["content-type"] => ["application/pdf"]
 
-        FileUtils.mkdir_p(payslip.directory)
-        @logger.info("saving payslip...") { payslip.filename }
-        File.write(payslip.filename, response.body) unless @test
+        path = File.join(@payslip_dir, payslip.filename)
+        FileUtils.mkdir_p(@payslip_dir)
+        @logger.info("saving payslip...") { path }
+        File.write(path, response.body) unless @test
         existing_payslips << payslip.metadata
       end
     end
@@ -116,7 +117,7 @@ class PXMyPortal::Agent
 
     File.write(page.cache_path, response.body)
     page.rows(response.body)
-      .map { |row| PXMyPortal::Payslip.from_row(row, directory: @payslip_dir) }
+      .map { |row| PXMyPortal::Payslip.from_row(row) }
   end
 
   def request_verification_token
@@ -155,7 +156,7 @@ class PXMyPortal::Agent
                  user:,
                  password:,
                  test: false,
-                 payslip_dir: nil,
+                 payslip_dir: PXMyPortal::XDG::DOC_DIR,
                  bonus_only: false,
                  debug_http: false,
                  force: false)
