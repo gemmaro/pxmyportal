@@ -1,3 +1,5 @@
+require "fileutils"
+
 # Previously @phase.
 class PXMyPortal::Page
   BASEPATH = "/pmpwps/"
