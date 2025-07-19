@@ -40,7 +40,8 @@ class PXMyPortal::Agent
     begin
       response => Net::HTTPFound
     rescue => e
-      File.write(File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "let_redirect.html"), response.body)
+      File.write(File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "let_redirect.html"),
+                 response.body)
       raise e
     end
 
@@ -153,7 +154,8 @@ class PXMyPortal::Agent
 
   def initialize(debug: false,
                  cookie_jar_path: nil,
-                 payslips_path: File.join(ENV["XDG_DATA_HOME"], "pxmyportal", "payslips.yaml"),
+                 payslips_path: File.join(ENV["XDG_DATA_HOME"],
+                                          "pxmyportal", "payslips.yaml"),
                  company:,
                  user:,
                  password:,
