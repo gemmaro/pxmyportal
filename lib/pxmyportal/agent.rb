@@ -17,6 +17,7 @@ require "yaml"
 require "net/http"
 require "nokogiri"
 require "logger"
+require "set"
 require_relative "payslip"
 require_relative "error"
 require_relative "cookie"
@@ -51,7 +52,7 @@ class PXMyPortal::Agent
     existing_payslips = (YAML.load_file(@payslips_path) rescue []) || []
     payslips.each do |payslip|
       if existing_payslips&.find { |candidate| payslip == candidate }
-        $stderr.puts "skip #{payslip}"
+        @logger.info("skipping") { payslip }
         next
       end
       path = @page.confirm_path
@@ -88,14 +89,27 @@ class PXMyPortal::Agent
   def payslips
     return @payslips if @payslips
 
+    pages = Set[PXMyPortal::Page::BONUS]
+    unless @bonus_only
+      pages << @page
+    end
+
+    @payslips = []
+    pages.each do |page|
+      @payslips.concat(payslips_for_page(page))
+    end
+    @payslips
+  end
+
+  def payslips_for_page(page)
     request = Net::HTTP::Get.new(@page.path)
     @cookie.provide(request, url: build_url(@page.path))
     response = http.request(request)
     response => Net::HTTPOK
 
-    @payslips = Nokogiri::HTML(response.body)
-                  .xpath("//*[@id='ContentPlaceHolder1_PayslipGridView']//tr")
-                  .map { |row| PXMyPortal::Payslip.from_row(row, directory: @payslip_dir) }
+    Nokogiri::HTML(response.body)
+      .xpath("//*[@id='ContentPlaceHolder1_PayslipGridView']//tr")
+      .map { |row| PXMyPortal::Payslip.from_row(row, directory: @payslip_dir) }
   end
 
   def request_verification_token
