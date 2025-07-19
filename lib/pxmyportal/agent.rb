@@ -24,10 +24,10 @@ require_relative "cookie"
 require_relative "page"
 
 class PXMyPortal::Agent
-  def let_redirect
+  def let_redirect(path: PXMyPortal::Page::BASEPATH)
     token = request_verification_token
-    request = Net::HTTP::Post.new(PXMyPortal::Page::BASEPATH)
-    @cookie.provide(request, url: build_url(PXMyPortal::Page::BASEPATH))
+    request = Net::HTTP::Post.new(path)
+    @cookie.provide(request, url: build_url(path))
 
     data = { LoginId: @user,
              Password: @password,
@@ -35,15 +35,19 @@ class PXMyPortal::Agent
     request.form_data = data
     response = http.request(request)
     begin
-      response => Net::HTTPFound
+      response => Net::HTTPFound | Net::HTTPOK
     rescue => e
       File.write(File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "let_redirect.html"),
                  response.body)
       raise e
     end
 
-    @page = PXMyPortal::Page.from_path(response["location"]) \
-      or raise PXMyPortal::Error, "unexpected location #{location}"
+    @logger.debug("response") { response.to_hash }
+    @page = PXMyPortal::Page.from_path(response["location"] || path)
+    unless @page
+      @logger.error("location") { response["location"] }
+      raise PXMyPortal::Error, "unexpected location"
+    end
     @cookie.accept(response, url: build_url(@page.path))
     self
   end
@@ -57,6 +61,7 @@ class PXMyPortal::Agent
     end
 
     pages.each do |page|
+      let_redirect(path: page.path)
       payslips = payslips_for_page(page)
 
       payslips.each do |payslip|
