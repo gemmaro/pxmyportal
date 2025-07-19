@@ -44,13 +44,15 @@ class PXMyPortal::Page
     confirm_path: File.join(CLIENT_BASEPATH, "ConfirmSamplePDFFrame"),
     cache_filename: "sample", row_xpath: normal_row_xpath)
 
+  production_confirm_path = "ConfirmPDFFrame"
+
   # Previously PAYSLIP_PAGE_PATH_NORMAL.
   NORMAL = new(path: NORMAL_PATH,
-               confirm_path: File.join(CLIENT_BASEPATH, "ConfirmPDFFrame"),
+               confirm_path: File.join(CLIENT_BASEPATH, production_confirm_path),
                cache_filename: "normal", row_xpath: normal_row_xpath)
 
   # Previously PAYSLIP_PAGE_PATH_BONUS.
-  BONUS = new(path: BONUS_PATH, confirm_path: :TODO,
+  BONUS = new(path: BONUS_PATH, confirm_path: production_confirm_path,
               cache_filename: "bonus",
               row_xpath: "//*[@id='ContentPlaceHolder1_BonusPayslipGridView']//tr")
 
