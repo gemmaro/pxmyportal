@@ -93,18 +93,23 @@ class PXMyPortal::Agent
     unless @bonus_only
       pages << @page
     end
+    @logger.debug("pages") { pages }
 
     @payslips = []
     pages.each do |page|
       @payslips.concat(payslips_for_page(page))
     end
+    @logger.debug("payslips") { @payslips }
     @payslips
   end
 
   def payslips_for_page(page)
-    request = Net::HTTP::Get.new(@page.path)
-    @cookie.provide(request, url: build_url(@page.path))
+    request = Net::HTTP::Get.new(page.path)
+    @debug and @logger.debug("request") { request }
+
+    @cookie.provide(request, url: build_url(page.path))
     response = http.request(request)
+    @debug and @logger.debug("response") { response }
     response => Net::HTTPOK
 
     Nokogiri::HTML(response.body)
@@ -115,7 +120,7 @@ class PXMyPortal::Agent
   def request_verification_token
     return @request_verification_token if @request_verification_token
 
-    @debug and http.set_debug_output($stderr)
+    @debug_http and http.set_debug_output($stderr)
     http.start
     path = File.join(PXMyPortal::Page::BASEPATH, "Auth/Login")
     query = @company
@@ -149,7 +154,8 @@ class PXMyPortal::Agent
                  password:,
                  test: false,
                  payslip_dir: nil,
-                 bonus_only: false)
+                 bonus_only: false,
+                 debug_http: false)
 
     @company         = company
     @user            = user
@@ -159,6 +165,7 @@ class PXMyPortal::Agent
     @test            = test
     @payslip_dir     = payslip_dir
     @bonus_only      = bonus_only
+    @debug_http      = debug_http
 
     @logger = Logger.new($stderr)
     @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)
