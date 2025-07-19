@@ -9,24 +9,40 @@ class PXMyPortal::Page
 
   attr_reader :path, :confirm_path
 
-  def initialize(path:, confirm_path:)
+  def initialize(path:, confirm_path:, cache_filename:)
     @path = path
 
     # Previously confirm_pdf_frame_path.
     @confirm_path = confirm_path
+
+    @cache_filename = cache_filename
+  end
+
+  def cache_path
+    @cache_path and return @cache_path
+    @cache_path = File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "page", "#{@cache_filename}.html")
+
+    dir = File.dirname(@cache_path)
+    unless Dir.exist?(dir)
+      FileUtils.mkdir_p(dir)
+    end
+    @cache_path
   end
 
   # Previously PAYSLIP_PAGE_PATH_SAMPLE.
   SAMPLE = new(
     path: SAMPLE_PATH,
-    confirm_path: File.join(CLIENT_BASEPATH, "ConfirmSamplePDFFrame"))
+    confirm_path: File.join(CLIENT_BASEPATH, "ConfirmSamplePDFFrame"),
+    cache_filename: "sample")
 
   # Previously PAYSLIP_PAGE_PATH_NORMAL.
   NORMAL = new(path: NORMAL_PATH,
-               confirm_path: File.join(CLIENT_BASEPATH, "ConfirmPDFFrame"))
+               confirm_path: File.join(CLIENT_BASEPATH, "ConfirmPDFFrame"),
+               cache_filename: "normal")
 
   # Previously PAYSLIP_PAGE_PATH_BONUS.
-  BONUS = new(path: BONUS_PATH, confirm_path: :TODO)
+  BONUS = new(path: BONUS_PATH, confirm_path: :TODO,
+              cache_filename: "bonus")
 
   def self.from_path(path)
     { SAMPLE_PATH => SAMPLE, NORMAL_PATH => NORMAL, BONUS_PATH => NORMAL }[path]

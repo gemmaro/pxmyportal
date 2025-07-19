@@ -99,6 +99,7 @@ class PXMyPortal::Agent
     pages.each do |page|
       @payslips.concat(payslips_for_page(page))
     end
+    @logger.warn("no payslips") if @payslips.empty?
     @logger.debug("payslips") { @payslips }
     @payslips
   end
@@ -112,6 +113,7 @@ class PXMyPortal::Agent
     @debug and @logger.debug("response") { response }
     response => Net::HTTPOK
 
+    File.write(page.cache_path, response.body)
     Nokogiri::HTML(response.body)
       .xpath("//*[@id='ContentPlaceHolder1_PayslipGridView']//tr")
       .map { |row| PXMyPortal::Payslip.from_row(row, directory: @payslip_dir) }
