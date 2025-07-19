@@ -15,23 +15,22 @@
 
 require "yaml"
 require "net/http"
-require "http-cookie" # Use CGI::Cookie?
 require "nokogiri"
 require "logger"
 require_relative "payslip"
 require_relative "error"
+require_relative "cookie"
 
 class PXMyPortal::Agent
   PAYSLIP_PAGE_PATH_SAMPLE = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslipSample")
   PAYSLIP_PAGE_PATH_NORMAL = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslip")
   PAYSLIP_PAGE_PATH_BONUS = File.join(PXMyPortal::CLIENT_BASEPATH, "BonusPayslip")
-  CACHE_DIR = File.join(ENV["XDG_CACHE_HOME"], "pxmyportal")
 
   def let_redirect
     token = request_verification_token
     path = PXMyPortal::BASEPATH
     request = Net::HTTP::Post.new(path)
-    provide_cookie(request, url: build_url(path))
+    @cookie.provide(request, url: build_url(path))
 
     data = { LoginId: @user,
              Password: @password,
@@ -41,7 +40,7 @@ class PXMyPortal::Agent
     begin
       response => Net::HTTPFound
     rescue => e
-      File.write(File.join(CACHE_DIR, "debug", "let_redirect.html"), response.body)
+      File.write(File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "let_redirect.html"), response.body)
       raise e
     end
 
@@ -55,7 +54,7 @@ class PXMyPortal::Agent
     else
       raise PXMyPortal::Error, "unexpected location #{location}"
     end
-    accept_cookie(response, url: build_url(payslip_page_path))
+    @cookie.accept(response, url: build_url(payslip_page_path))
     self
   end
 
@@ -68,7 +67,7 @@ class PXMyPortal::Agent
       end
       path = confirm_pdf_frame_path
       request = Net::HTTP::Post.new(path)
-      provide_cookie(request, url: build_url(path))
+      @cookie.provide(request, url: build_url(path))
       request.form_data = payslip.form_data
       response = http.request(request)
       response => Net::HTTPOK
@@ -106,7 +105,7 @@ class PXMyPortal::Agent
     return @payslips if @payslips
 
     request = Net::HTTP::Get.new(payslip_page_path)
-    provide_cookie(request, url: build_url(payslip_page_path))
+    @cookie.provide(request, url: build_url(payslip_page_path))
     response = http.request(request)
     response => Net::HTTPOK
 
@@ -125,8 +124,8 @@ class PXMyPortal::Agent
     response = http.get("#{path}?#{query}")
     response => Net::HTTPOK
 
-    @jar.load(@cookie_jar_path) if File.exist?(@cookie_jar_path)
-    accept_cookie(response, url: build_url(path, query:))
+    @cookie.load
+    @cookie.accept(response, url: build_url(path, query:))
 
     document = Nokogiri::HTML(response.body)
     token = <<~XPATH
@@ -153,7 +152,7 @@ class PXMyPortal::Agent
   end
 
   def initialize(debug: false,
-                 cookie_jar_path: File.join(CACHE_DIR, "cookie-jar"),
+                 cookie_jar_path: nil,
                  payslips_path: File.join(ENV["XDG_DATA_HOME"], "pxmyportal", "payslips.yaml"),
                  company:,
                  user:,
@@ -165,8 +164,6 @@ class PXMyPortal::Agent
     @company         = company
     @user            = user
     @password        = password
-    @cookie_jar_path = cookie_jar_path
-    @jar             = HTTP::CookieJar.new
     @debug           = debug
     @payslips_path   = payslips_path
     @test            = test
@@ -174,6 +171,7 @@ class PXMyPortal::Agent
     @bonus_only      = bonus_only
 
     @logger = Logger.new($stderr)
+    @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)
   end
 
   def http
@@ -182,24 +180,5 @@ class PXMyPortal::Agent
     http = Net::HTTP.new(PXMyPortal::HOST, Net::HTTP.https_default_port)
     http.use_ssl = true
     @http = http
-  end
-
-  def accept_cookie(response, url:)
-    response.get_fields("Set-Cookie").each { |value| @jar.parse(value, url) }
-    @jar.save(cookie_jar_path)
-  end
-
-  def cookie_jar_path
-    @created_cookie_jar_path and return @created_cookie_jar_path
-    dir = File.dirname(@cookie_jar_path)
-    unless Dir.exist?(dir)
-      @logger.info("creating cache directory")
-      Dir.mkdir(dir)
-    end
-    @created_cookie_jar_path = @cookie_jar_path
-  end
-
-  def provide_cookie(request, url:)
-    request["Cookie"] = HTTP::Cookie.cookie_value(@jar.cookies(url))
   end
 end
