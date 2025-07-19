@@ -15,8 +15,6 @@
 
 class PXMyPortal
   HOST = "pxmyportal.tkc.jp"
-  BASEPATH = "/pmpwps/"
-  CLIENT_BASEPATH = File.join(BASEPATH, "pc/")
 end
 
 require_relative "pxmyportal/command"

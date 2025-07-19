@@ -20,17 +20,13 @@ require "logger"
 require_relative "payslip"
 require_relative "error"
 require_relative "cookie"
+require_relative "page"
 
 class PXMyPortal::Agent
-  PAYSLIP_PAGE_PATH_SAMPLE = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslipSample")
-  PAYSLIP_PAGE_PATH_NORMAL = File.join(PXMyPortal::CLIENT_BASEPATH, "SalaryPayslip")
-  PAYSLIP_PAGE_PATH_BONUS = File.join(PXMyPortal::CLIENT_BASEPATH, "BonusPayslip")
-
   def let_redirect
     token = request_verification_token
-    path = PXMyPortal::BASEPATH
-    request = Net::HTTP::Post.new(path)
-    @cookie.provide(request, url: build_url(path))
+    request = Net::HTTP::Post.new(PXMyPortal::Page::BASEPATH)
+    @cookie.provide(request, url: build_url(PXMyPortal::Page::BASEPATH))
 
     data = { LoginId: @user,
              Password: @password,
@@ -45,17 +41,9 @@ class PXMyPortal::Agent
       raise e
     end
 
-    case (location = response["location"])
-    when PAYSLIP_PAGE_PATH_SAMPLE
-      @phase = :sample
-    when PAYSLIP_PAGE_PATH_NORMAL
-      @phase = :normal
-    when PAYSLIP_PAGE_PATH_BONUS
-      @phase = :bonus
-    else
-      raise PXMyPortal::Error, "unexpected location #{location}"
-    end
-    @cookie.accept(response, url: build_url(payslip_page_path))
+    @page = PXMyPortal::Page.from_path(response["location"]) \
+      or raise PXMyPortal::Error, "unexpected location #{location}"
+    @cookie.accept(response, url: build_url(@page.path))
     self
   end
 
@@ -66,7 +54,7 @@ class PXMyPortal::Agent
         $stderr.puts "skip #{payslip}"
         next
       end
-      path = confirm_pdf_frame_path
+      path = @page.confirm_path
       request = Net::HTTP::Post.new(path)
       @cookie.provide(request, url: build_url(path))
       request.form_data = payslip.form_data
@@ -96,17 +84,11 @@ class PXMyPortal::Agent
     @created_payslips_path = @payslips_path
   end
 
-  def payslip_page_path
-    @payslip_page_path ||= { sample: PAYSLIP_PAGE_PATH_SAMPLE,
-                             normal: PAYSLIP_PAGE_PATH_NORMAL,
-                             bonus: PAYSLIP_PAGE_PATH_BONUS }[@phase]
-  end
-
   def payslips
     return @payslips if @payslips
 
-    request = Net::HTTP::Get.new(payslip_page_path)
-    @cookie.provide(request, url: build_url(payslip_page_path))
+    request = Net::HTTP::Get.new(@page.path)
+    @cookie.provide(request, url: build_url(@page.path))
     response = http.request(request)
     response => Net::HTTPOK
 
@@ -120,7 +102,7 @@ class PXMyPortal::Agent
 
     @debug and http.set_debug_output($stderr)
     http.start
-    path = File.join(PXMyPortal::BASEPATH, "Auth/Login")
+    path = File.join(PXMyPortal::Page::BASEPATH, "Auth/Login")
     query = @company
     response = http.get("#{path}?#{query}")
     response => Net::HTTPOK
@@ -141,15 +123,6 @@ class PXMyPortal::Agent
 
   def build_url(path, query: nil)
     URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
-  end
-
-  def confirm_pdf_frame_path
-    case @phase
-    in :sample
-      File.join(PXMyPortal::CLIENT_BASEPATH, "ConfirmSamplePDFFrame")
-    in :normal
-      File.join(PXMyPortal::CLIENT_BASEPATH, "ConfirmPDFFrame")
-    end
   end
 
   def initialize(debug: false,
