@@ -36,6 +36,10 @@ class PXMyPortal::Page
     Nokogiri::HTML(source).xpath(@row_xpath)
   end
 
+  def inspect
+    "#<Page #{@cache_filename}>"
+  end
+
   normal_row_xpath = "//*[@id='ContentPlaceHolder1_PayslipGridView']//tr"
 
   # Previously PAYSLIP_PAGE_PATH_SAMPLE.

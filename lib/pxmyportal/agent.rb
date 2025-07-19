@@ -51,7 +51,7 @@ class PXMyPortal::Agent
   def save_payslips
     existing_payslips = (YAML.load_file(@payslips_path) rescue []) || []
     payslips.each do |payslip|
-      if existing_payslips&.find { |candidate| payslip == candidate }
+      if !@force && existing_payslips&.find { |candidate| payslip == candidate }
         @logger.info("skipping") { payslip }
         next
       end
@@ -59,6 +59,8 @@ class PXMyPortal::Agent
       request = Net::HTTP::Post.new(path)
       @cookie.provide(request, url: build_url(path))
       request.form_data = payslip.form_data
+      @logger.debug("request") { request }
+
       response = http.request(request)
       response => Net::HTTPOK
 
@@ -156,7 +158,8 @@ class PXMyPortal::Agent
                  test: false,
                  payslip_dir: nil,
                  bonus_only: false,
-                 debug_http: false)
+                 debug_http: false,
+                 force: false)
 
     @company         = company
     @user            = user
@@ -167,6 +170,7 @@ class PXMyPortal::Agent
     @payslip_dir     = payslip_dir
     @bonus_only      = bonus_only
     @debug_http      = debug_http
+    @force           = force
 
     @logger = Logger.new($stderr)
     @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)

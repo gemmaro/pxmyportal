@@ -32,6 +32,7 @@ class PXMyPortal::Command
     parser.on("--payslip-dir=PATH") { |path| options[:payslip_dir] = path }
     parser.on("--bonus-only") { options[:bonus_only] = true }
     parser.on("--debug-http") { options[:debug_http] = true }
+    parser.on("--force") { options[:force] = true }
     parser.parse!
 
     agent = PXMyPortal::Agent.new(**options)
