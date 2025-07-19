@@ -63,6 +63,8 @@ class PXMyPortal::Agent
 
       response = http.request(request)
       response => Net::HTTPOK
+      @logger.debug("response") { response.to_hash }
+      response.to_hash["content-type"] => ["application/pdf"]
 
       FileUtils.mkdir_p(payslip.directory)
       @logger.info("saving payslip...") { payslip.filename }
