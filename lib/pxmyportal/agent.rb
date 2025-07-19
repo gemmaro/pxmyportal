@@ -64,7 +64,7 @@ class PXMyPortal::Agent
       response = http.request(request)
       response => Net::HTTPOK
 
-      FileUtils.mkdir_p(payslip.directory) unless File.directory?(payslip.directory)
+      FileUtils.mkdir_p(payslip.directory)
       @logger.info("saving payslip...") { payslip.filename }
       File.write(payslip.filename, response.body) unless @test
       existing_payslips << payslip.metadata
