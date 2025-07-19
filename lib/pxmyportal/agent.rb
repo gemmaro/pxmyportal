@@ -50,26 +50,36 @@ class PXMyPortal::Agent
 
   def save_payslips
     existing_payslips = (YAML.load_file(@payslips_path) rescue []) || []
-    payslips.each do |payslip|
-      if !@force && existing_payslips&.find { |candidate| payslip == candidate }
-        @logger.info("skipping") { payslip }
-        next
+
+    pages = Set[PXMyPortal::Page::BONUS]
+    unless @bonus_only
+      pages << @page
+    end
+
+    pages.each do |page|
+      payslips = payslips_for_page(page)
+
+      payslips.each do |payslip|
+        if !@force && existing_payslips&.find { |candidate| payslip == candidate }
+          @logger.info("skipping") { payslip }
+          next
+        end
+        path = @page.confirm_path
+        request = Net::HTTP::Post.new(path)
+        @cookie.provide(request, url: build_url(path))
+        request.form_data = payslip.form_data
+        @logger.debug("request") { request }
+
+        response = http.request(request)
+        response => Net::HTTPOK
+        @logger.debug("response") { response.to_hash }
+        # response.to_hash["content-type"] => ["application/pdf"]
+
+        FileUtils.mkdir_p(payslip.directory)
+        @logger.info("saving payslip...") { payslip.filename }
+        File.write(payslip.filename, response.body) unless @test
+        existing_payslips << payslip.metadata
       end
-      path = @page.confirm_path
-      request = Net::HTTP::Post.new(path)
-      @cookie.provide(request, url: build_url(path))
-      request.form_data = payslip.form_data
-      @logger.debug("request") { request }
-
-      response = http.request(request)
-      response => Net::HTTPOK
-      @logger.debug("response") { response.to_hash }
-      # response.to_hash["content-type"] => ["application/pdf"]
-
-      FileUtils.mkdir_p(payslip.directory)
-      @logger.info("saving payslip...") { payslip.filename }
-      File.write(payslip.filename, response.body) unless @test
-      existing_payslips << payslip.metadata
     end
     
     File.open(payslips_path, "w") { |file| YAML.dump(existing_payslips, file) } \
@@ -88,24 +98,6 @@ class PXMyPortal::Agent
       Dir.mkdir(dir)
     end
     @created_payslips_path = @payslips_path
-  end
-
-  def payslips
-    return @payslips if @payslips
-
-    pages = Set[PXMyPortal::Page::BONUS]
-    unless @bonus_only
-      pages << @page
-    end
-    @logger.debug("pages") { pages }
-
-    @payslips = []
-    pages.each do |page|
-      @payslips.concat(payslips_for_page(page))
-    end
-    @logger.warn("no payslips") if @payslips.empty?
-    @logger.debug("payslips") { @payslips }
-    @payslips
   end
 
   def payslips_for_page(page)
