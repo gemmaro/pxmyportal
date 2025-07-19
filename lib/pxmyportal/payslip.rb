@@ -13,11 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+require_relative "xdg"
+
 class PXMyPortal::Payslip
   attr_reader :year_month, :description, :directory
 
   def initialize(year_month:, description:, key1:, key2:, key3:,
-                 directory: File.join(ENV["XDG_DOCUMENTS_DIR"], "pxmyportal"))
+                 directory: PXMyPortal::XDG::DOC_DIR)
     @year_month  = year_month
     @description = description
     @key1        = key1

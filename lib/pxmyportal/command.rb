@@ -21,8 +21,7 @@ class PXMyPortal::Command
     options = { company: ENV["PXMYPORTAL_COMPANY"],
                 user: ENV["PXMYPORTAL_USER"],
                 password: ENV["PXMYPORTAL_PASSWORD"],
-                test: ENV["PXMYPORTAL_TEST"],
-                payslip_dir: Dir.pwd }
+                test: ENV["PXMYPORTAL_TEST"] }
 
     parser = OptionParser.new
     parser.on("--debug") { options[:debug] = true }
