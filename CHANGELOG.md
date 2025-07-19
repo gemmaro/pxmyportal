@@ -1,5 +1,9 @@
 # Change Log of PXMyPortal gem
 
+## 0.0.4 - 2025-07-19
+
+Bug fixes.
+
 ## 0.0.3 - 2025-07-19
 
 Enable to save bonus payslips.
