@@ -9,13 +9,14 @@ class PXMyPortal::Page
 
   attr_reader :path, :confirm_path
 
-  def initialize(path:, confirm_path:, cache_filename:)
+  def initialize(path:, confirm_path:, cache_filename:, row_xpath:)
     @path = path
 
     # Previously confirm_pdf_frame_path.
     @confirm_path = confirm_path
 
     @cache_filename = cache_filename
+    @row_xpath = row_xpath
   end
 
   def cache_path
@@ -29,20 +30,27 @@ class PXMyPortal::Page
     @cache_path
   end
 
+  def rows(source)
+    Nokogiri::HTML(source).xpath(@row_xpath)
+  end
+
+  normal_row_xpath = "//*[@id='ContentPlaceHolder1_PayslipGridView']//tr"
+
   # Previously PAYSLIP_PAGE_PATH_SAMPLE.
   SAMPLE = new(
     path: SAMPLE_PATH,
     confirm_path: File.join(CLIENT_BASEPATH, "ConfirmSamplePDFFrame"),
-    cache_filename: "sample")
+    cache_filename: "sample", row_xpath: normal_row_xpath)
 
   # Previously PAYSLIP_PAGE_PATH_NORMAL.
   NORMAL = new(path: NORMAL_PATH,
                confirm_path: File.join(CLIENT_BASEPATH, "ConfirmPDFFrame"),
-               cache_filename: "normal")
+               cache_filename: "normal", row_xpath: normal_row_xpath)
 
   # Previously PAYSLIP_PAGE_PATH_BONUS.
   BONUS = new(path: BONUS_PATH, confirm_path: :TODO,
-              cache_filename: "bonus")
+              cache_filename: "bonus",
+              row_xpath: "//*[@id='ContentPlaceHolder1_BonusPayslipGridView']//tr")
 
   def self.from_path(path)
     { SAMPLE_PATH => SAMPLE, NORMAL_PATH => NORMAL, BONUS_PATH => NORMAL }[path]

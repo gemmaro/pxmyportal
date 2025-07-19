@@ -114,8 +114,7 @@ class PXMyPortal::Agent
     response => Net::HTTPOK
 
     File.write(page.cache_path, response.body)
-    Nokogiri::HTML(response.body)
-      .xpath("//*[@id='ContentPlaceHolder1_PayslipGridView']//tr")
+    page.rows(response.body)
       .map { |row| PXMyPortal::Payslip.from_row(row, directory: @payslip_dir) }
   end
 
