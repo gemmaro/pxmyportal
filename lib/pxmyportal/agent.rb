@@ -121,27 +121,11 @@ class PXMyPortal::Agent
   end
 
   def request_verification_token
-    return @request_verification_token if @request_verification_token
-
-    @debug_http and @http.set_debug_output($stderr)
-    @http.start
-    path = File.join(PXMyPortal::Page::BASEPATH, "Auth/Login")
-    query = @company
-    response = @http.get("#{path}?#{query}")
-    response => Net::HTTPOK
-
-    @cookie.load
-    @cookie.accept(response, url: build_url(path, query:))
-
-    document = Nokogiri::HTML(response.body)
-    token = <<~XPATH
-      //form//input[     @type='hidden'
-                     and @name='__RequestVerificationToken' ]
-      /@value
-    XPATH
-    document.xpath(token) => [token]
-    token or raise Error, token
-    @request_verification_token = token
+    @request_verification_token ||= PXMyPortal::RequestVerificationToken.new(
+      http: @http,
+      company: @company,
+      cookie: @cookie,
+    ).get
   end
 
   def build_url(path, query: nil)
@@ -174,8 +158,9 @@ class PXMyPortal::Agent
 
     @logger = Logger.new($stderr)
     @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)
-    @http = PXMyPortal::HTTPClient.new
+    @http = PXMyPortal::HTTPClient.new(debug: @debug_http)
   end
 end
 
 require_relative "http_client"
+require_relative "request_verification_token"
