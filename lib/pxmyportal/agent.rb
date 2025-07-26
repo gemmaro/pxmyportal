@@ -33,7 +33,7 @@ class PXMyPortal::Agent
              Password: @password,
              "__RequestVerificationToken" => token }
     request.form_data = data
-    response = http.request(request)
+    response = @http.request(request)
     begin
       response => Net::HTTPFound | Net::HTTPOK
     rescue => e
@@ -75,7 +75,7 @@ class PXMyPortal::Agent
         request.form_data = payslip.form_data
         @logger.debug("request") { request }
 
-        response = http.request(request)
+        response = @http.request(request)
         response => Net::HTTPOK
         @logger.debug("response") { response.to_hash }
         # response.to_hash["content-type"] => ["application/pdf"]
@@ -111,7 +111,7 @@ class PXMyPortal::Agent
     @debug and @logger.debug("request") { request }
 
     @cookie.provide(request, url: build_url(page.path))
-    response = http.request(request)
+    response = @http.request(request)
     @debug and @logger.debug("response") { response }
     response => Net::HTTPOK
 
@@ -123,11 +123,11 @@ class PXMyPortal::Agent
   def request_verification_token
     return @request_verification_token if @request_verification_token
 
-    @debug_http and http.set_debug_output($stderr)
-    http.start
+    @debug_http and @http.set_debug_output($stderr)
+    @http.start
     path = File.join(PXMyPortal::Page::BASEPATH, "Auth/Login")
     query = @company
-    response = http.get("#{path}?#{query}")
+    response = @http.get("#{path}?#{query}")
     response => Net::HTTPOK
 
     @cookie.load
@@ -174,13 +174,8 @@ class PXMyPortal::Agent
 
     @logger = Logger.new($stderr)
     @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)
-  end
-
-  def http
-    return @http if @http
-
-    http = Net::HTTP.new(PXMyPortal::HOST, Net::HTTP.https_default_port)
-    http.use_ssl = true
-    @http = http
+    @http = PXMyPortal::HTTPClient.new
   end
 end
+
+require_relative "http_client"
