@@ -16,5 +16,5 @@ class PXMyPortal::HTTPClient
   end
 
   extend Forwardable
-  def_delegators :@http, :start, :get, :request, :set_debug_output, :started?
+  def_delegators :@http, :get, :request, :set_debug_output, :started?
 end
