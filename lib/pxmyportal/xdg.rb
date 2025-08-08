@@ -18,4 +18,5 @@ class PXMyPortal::XDG
                         "pxmyportal")
   DOC_DIR = File.join(ENV["XDG_DOCUMENTS_DIR"] || File.join(Dir.home, "Documents"),
                       "pxmyportal")
+  DATA_DIR = ENV["XDG_DATA_HOME"]
 end
