@@ -53,6 +53,8 @@ class PXMyPortal::Agent
   end
 
   def save_payslips
+    let_redirect
+
     existing_payslips = (YAML.load_file(@payslips_path) rescue []) || []
 
     pages = Set[PXMyPortal::Page::BONUS]

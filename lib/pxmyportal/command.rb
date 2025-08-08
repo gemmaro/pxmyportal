@@ -36,7 +36,6 @@ class PXMyPortal::Command
     parser.parse!
 
     agent = PXMyPortal::Agent.new(**options)
-    agent.let_redirect
     agent.save_payslips
   end
 end
