@@ -25,14 +25,20 @@ require_relative "page"
 
 class PXMyPortal::Agent
   def let_redirect(path: PXMyPortal::Page::BASEPATH)
-    token = request_verification_token
+    @request_verification_token ||= PXMyPortal::RequestVerificationToken.new(
+      http: @http,
+      company: @company,
+      cookie: @cookie,
+    ).get
+
     request = Net::HTTP::Post.new(path)
     @cookie.provide(request, url: build_url(path))
 
-    data = { LoginId: @user,
-             Password: @password,
-             "__RequestVerificationToken" => token }
-    request.form_data = data
+    request.form_data = {
+      LoginId: @user,
+      Password: @password,
+      "__RequestVerificationToken" => @request_verification_token,
+    }
     response = @http.request(request)
     begin
       response => Net::HTTPFound | Net::HTTPOK
@@ -120,14 +126,6 @@ class PXMyPortal::Agent
     File.write(page.cache_path, response.body)
     page.rows(response.body)
       .map { |row| PXMyPortal::Payslip.from_row(row) }
-  end
-
-  def request_verification_token
-    @request_verification_token ||= PXMyPortal::RequestVerificationToken.new(
-      http: @http,
-      company: @company,
-      cookie: @cookie,
-    ).get
   end
 
   def build_url(path, query: nil)
