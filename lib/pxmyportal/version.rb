@@ -16,5 +16,5 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 module PXMyPortal
-  VERSION = "0.0.6"
+  VERSION = "0.1.0"
 end
