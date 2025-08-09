@@ -15,6 +15,7 @@
 
 require "http-cookie"
 require_relative "xdg"
+require_relative "cookie_store"
 
 class PXMyPortal::Cookie
   def initialize(jar_path: nil, logger:)
@@ -22,6 +23,7 @@ class PXMyPortal::Cookie
     @logger = logger
 
     @jar             = HTTP::CookieJar.new
+    @debug_store = PXMyPortal::CookieStore.new
   end
 
   def load
@@ -30,8 +32,13 @@ class PXMyPortal::Cookie
 
   # Previously accept_cookie.
   def accept(response, url:)
-    [*response.get_fields("Set-Cookie"), *response.get_fields("set-cookie")]
-      .each { |value| @jar.parse(value, url) }
+    fields = [*response.get_fields("Set-Cookie"), *response.get_fields("set-cookie")]
+    @debug_store.transaction do
+      @debug_store[url] ||= []
+      @debug_store[url].concat(fields)
+    end
+
+    fields.each { |value| @jar.parse(value, url) }
     @jar.save(jar_path)
   end
 

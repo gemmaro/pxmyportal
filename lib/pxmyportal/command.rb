@@ -14,7 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require "optparse"
+require "pstore"
 require_relative "agent"
+require_relative "cookie_store"
 
 class PXMyPortal::Command
   def run
@@ -22,6 +24,7 @@ class PXMyPortal::Command
                 user: ENV["PXMYPORTAL_USER"],
                 password: ENV["PXMYPORTAL_PASSWORD"],
                 test: ENV["PXMYPORTAL_TEST"] }
+    debug_cookie = false
 
     parser = OptionParser.new
     parser.on("--debug") { options[:debug] = true }
@@ -33,7 +36,19 @@ class PXMyPortal::Command
     parser.on("--bonus-only") { options[:bonus_only] = true }
     parser.on("--debug-http") { options[:debug_http] = true }
     parser.on("--force") { options[:force] = true }
+    parser.on("--debug-cookie") { debug_cookie = true }
     parser.parse!
+
+    if debug_cookie
+      store = PXMyPortal::CookieStore.new
+      store.transaction do
+        store.keys.each do |key|
+          puts "--- #{key}"
+          pp store[key]
+        end
+      end
+      return
+    end
 
     agent = PXMyPortal::Agent.new(**options)
     agent.save_payslips
