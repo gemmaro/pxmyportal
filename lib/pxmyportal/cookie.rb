@@ -30,7 +30,8 @@ class PXMyPortal::Cookie
 
   # Previously accept_cookie.
   def accept(response, url:)
-    [*response.get_fields("Set-Cookie"), *response.get_fields("set-cookie")].each { |value| @jar.parse(value, url) }
+    [*response.get_fields("Set-Cookie"), *response.get_fields("set-cookie")]
+      .each { |value| @jar.parse(value, url) }
     @jar.save(jar_path)
   end
 
