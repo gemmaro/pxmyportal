@@ -78,20 +78,18 @@ class PXMyPortal::Agent
           next
         end
         path = @page.confirm_path
-        request = Net::HTTP::Post.new(path)
-        @cookie.provide(request, url: build_url(path))
-        request.form_data = payslip.form_data
-        @logger.debug("request") { request }
-
-        response = @http.request(request)
-        response => Net::HTTPOK
-        @logger.debug("response") { response.to_hash }
-        response.to_hash["content-type"] => ["application/pdf"]
+        data = PXMyPortal::DocumentDownloader.new(
+          path:,
+          cookie: @cookie,
+          form_data: payslip.form_data,
+          http: @http,
+          logger: @logger,
+        ).post
 
         path = File.join(@payslip_dir, payslip.filename)
         FileUtils.mkdir_p(@payslip_dir)
         @logger.info("saving payslip...") { path }
-        File.write(path, response.body) unless @test
+        File.write(path, data) unless @test
         existing_payslips << payslip.metadata
       end
     end
@@ -164,3 +162,4 @@ end
 
 require_relative "http_client"
 require_relative "request_verification_token"
+require_relative "document_downloader"
