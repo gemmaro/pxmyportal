@@ -28,4 +28,15 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "nokogiri"
+
+  spec.homepage = "https://github.com/gemmaro/pxmyportal"
+  spec.metadata = {
+    'rubygems_mfa_required' => 'true',
+    'bug_tracker_uri' => "#{spec.homepage}/issues",
+    'changelog_uri' => "#{spec.homepage}/blob/main/CHANGELOG.md",
+    'documentation_uri' => 'https://rubydoc.info/gems/pxmyportal',
+    'homepage_uri' => spec.homepage,
+    'source_code_uri' => spec.homepage,
+    'wiki_uri' => "#{spec.homepage}/wiki"
+  }
 end
