@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require "http-cookie" # Use CGI::Cookie?
+require "http-cookie"
 require_relative "xdg"
 
 class PXMyPortal::Cookie
