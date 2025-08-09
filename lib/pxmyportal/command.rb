@@ -44,7 +44,39 @@ class PXMyPortal::Command
       store.transaction do
         store.keys.each do |key|
           puts "--- #{key}"
-          pp store[key]
+          store[key].each do |cookie|
+            hash = {}
+            cookie.split(/; +/).map { |entry|
+              key, value = entry.split('=')
+              case key
+              when "ASP.NET_SessionId"
+                key = :asp_net_session_id
+              when ".AspNet.ApplicationCookie"
+                key = :asp_net_application_cookie
+              when /__RequestVerificationToken_([A-Za-z0-9]+)/
+                key = :request_verification_token
+                value = { key: $1, value: }
+              else
+                key = key.intern
+              end
+              hash[key] = value
+            }
+            case hash
+            in { asp_net_session_id:,
+                 path: "/",
+                 secure: nil,
+                 HttpOnly: nil,
+                 SameSite: "Lax",
+                 **nil }
+              asp_net_session_id
+            in { asp_net_application_cookie:, path: "/", HttpOnly: nil }
+              asp_net_application_cookie
+            in { request_verification_token:, path: "/", secure: nil, HttpOnly: nil }
+              request_verification_token
+            in { qs:, path: "/", secure: nil, HttpOnly: nil }
+              qs
+            end
+          end
         end
       end
       return
