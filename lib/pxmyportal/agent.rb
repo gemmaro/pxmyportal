@@ -31,31 +31,15 @@ class PXMyPortal::Agent
       cookie: @cookie,
     ).get
 
-    request = Net::HTTP::Post.new(path)
-    @cookie.provide(request, url: build_url(path))
-
-    request.form_data = {
-      LoginId: @user,
-      Password: @password,
-      "__RequestVerificationToken" => @request_verification_token,
-    }
-    response = @http.request(request)
-    begin
-      response => Net::HTTPFound | Net::HTTPOK
-    rescue => e
-      File.write(File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "let_redirect.html"),
-                 response.body)
-      raise e
-    end
-
-    @logger.debug("response") { response.to_hash }
-    @page = PXMyPortal::Page.from_path(response["location"] || path)
-    unless @page
-      @logger.error("location") { response["location"] }
-      raise PXMyPortal::Error, "unexpected location"
-    end
-    @cookie.accept(response, url: build_url(@page.path))
-    self
+    @page = PXMyPortal::Authentication.new(
+      path:,
+      cookie: @cookie,
+      user: @user,
+      password: @password,
+      token: @request_verification_token,
+      http: @http,
+      logger: @logger,
+    ).post
   end
 
   def save_payslips
@@ -163,3 +147,4 @@ end
 require_relative "http_client"
 require_relative "request_verification_token"
 require_relative "document_downloader"
+require_relative "authentication"
