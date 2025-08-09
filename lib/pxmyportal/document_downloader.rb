@@ -1,9 +1,8 @@
 require "net/http"
 
 class PXMyPortal::DocumentDownloader
-  def initialize(path:, cookie:, form_data:, logger:, http:)
+  def initialize(path:, form_data:, logger:, http:)
     @path = path
-    @cookie = cookie
     @form_data = form_data
     @logger = logger
     @http = http
@@ -12,7 +11,7 @@ class PXMyPortal::DocumentDownloader
   end
 
   def post
-    @cookie.provide(@request, url: build_url(@path))
+    @http.provide_cookie(@request, url: build_url(@path))
     @request.form_data = @form_data
     @logger.debug("request") { @request }
 

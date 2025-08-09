@@ -4,10 +4,9 @@ require_relative "http_client"
 require_relative "page"
 
 class PXMyPortal::RequestVerificationToken
-  def initialize(http:, company:, cookie:)
+  def initialize(http:, company:)
     @http = http
     @company = company
-    @cookie = cookie
   end
 
   def get
@@ -18,8 +17,8 @@ class PXMyPortal::RequestVerificationToken
     response = @http.get("#{path}?#{query}")
     response => Net::HTTPOK
 
-    @cookie.load
-    @cookie.accept(response, url: build_url(path, query:))
+    @http.load_cookie
+    @http.accept_cookie(response, url: build_url(path, query:))
 
     document = Nokogiri::HTML(response.body)
     token = <<~XPATH

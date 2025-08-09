@@ -1,11 +1,10 @@
 require "net/http"
 
 class PXMyPortal::PayslipList
-  def initialize(path:, debug:, logger:, cookie:, http:)
+  def initialize(path:, debug:, logger:, http:)
     @path = path
     @debug = debug
     @logger = logger
-    @cookie = cookie
     @http = http
 
     @request = Net::HTTP::Get.new(@path)
@@ -14,7 +13,7 @@ class PXMyPortal::PayslipList
   def get
     @debug and @logger.debug("request") { @request }
 
-    @cookie.provide(@request, url: build_url(@path))
+    @http.provide_cookie(@request, url: build_url(@path))
     response = @http.request(@request)
     @debug and @logger.debug("response") { response }
     response => Net::HTTPOK

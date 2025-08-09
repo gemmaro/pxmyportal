@@ -3,9 +3,8 @@ require_relative "xdg"
 require_relative "page"
 
 class PXMyPortal::Authentication
-  def initialize(path:, cookie:, user:, password:, token:, http:, logger:)
+  def initialize(path:, user:, password:, token:, http:, logger:)
     @path = path
-    @cookie = cookie
     @user = user
     @password = password
     @token = token
@@ -16,7 +15,7 @@ class PXMyPortal::Authentication
   end
 
   def post
-    @cookie.provide(@request, url: build_url(@path))
+    @http.provide_cookie(@request, url: build_url(@path))
 
     @request.form_data = {
       LoginId: @user,
@@ -38,7 +37,7 @@ class PXMyPortal::Authentication
       @logger.error("location") { response["location"] }
       raise PXMyPortal::Error, "unexpected location"
     end
-    @cookie.accept(response, url: build_url(page.path))
+    @http.accept_cookie(response, url: build_url(page.path))
     page
   end
 

@@ -18,7 +18,6 @@ require "logger"
 require "set"
 require_relative "payslip"
 require_relative "error"
-require_relative "cookie"
 require_relative "page"
 
 class PXMyPortal::Agent
@@ -26,12 +25,10 @@ class PXMyPortal::Agent
     @request_verification_token ||= PXMyPortal::RequestVerificationToken.new(
       http: @http,
       company: @company,
-      cookie: @cookie,
     ).get
 
     @page = PXMyPortal::Authentication.new(
       path:,
-      cookie: @cookie,
       user: @user,
       password: @password,
       token: @request_verification_token,
@@ -62,7 +59,6 @@ class PXMyPortal::Agent
         path = @page.confirm_path
         data = PXMyPortal::DocumentDownloader.new(
           path:,
-          cookie: @cookie,
           form_data: payslip.form_data,
           http: @http,
           logger: @logger,
@@ -99,7 +95,6 @@ class PXMyPortal::Agent
       path: page.path,
       debug: @debug,
       logger: @logger,
-      cookie: @cookie,
       http: @http,
     ).get
     File.write(page.cache_path, data)
@@ -136,8 +131,11 @@ class PXMyPortal::Agent
     @force           = force
 
     @logger = Logger.new($stderr)
-    @cookie = PXMyPortal::Cookie.new(jar_path: cookie_jar_path, logger: @logger)
-    @http = PXMyPortal::HTTPClient.new(debug: @debug_http)
+    @http = PXMyPortal::HTTPClient.new(
+      debug: @debug_http,
+      logger: @logger,
+      cookie_jar_path:,
+    )
   end
 end
 
