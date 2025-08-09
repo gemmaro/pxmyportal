@@ -15,7 +15,7 @@ class PXMyPortal::Authentication
   end
 
   def post
-    @http.provide_cookie(@request, url: build_url(@path))
+    @http.provide_cookie(@request)
 
     @request.form_data = {
       LoginId: @user,
@@ -37,11 +37,7 @@ class PXMyPortal::Authentication
       @logger.error("location") { response["location"] }
       raise PXMyPortal::Error, "unexpected location"
     end
-    @http.accept_cookie(response, url: build_url(page.path))
+    @http.accept_cookie(response)
     page
-  end
-
-  def build_url(path, query: nil)
-    URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
   end
 end

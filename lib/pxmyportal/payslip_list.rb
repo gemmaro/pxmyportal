@@ -12,14 +12,10 @@ class PXMyPortal::PayslipList
   def get
     @logger.debug("request") { @request }
 
-    @http.provide_cookie(@request, url: build_url(@path))
+    @http.provide_cookie(@request)
     response = @http.request(@request)
     @logger.debug("response") { response }
     response => Net::HTTPOK
     response.body
-  end
-
-  def build_url(path, query: nil)
-    URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
   end
 end

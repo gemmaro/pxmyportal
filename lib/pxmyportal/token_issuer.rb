@@ -17,8 +17,7 @@ class PXMyPortal::TokenIssuer
     response = @http.get("#{path}?#{query}")
     response => Net::HTTPOK
 
-    @http.load_cookie
-    @http.accept_cookie(response, url: build_url(path, query:))
+    @http.accept_cookie(response)
 
     document = Nokogiri::HTML(response.body)
     token = <<~XPATH
@@ -28,9 +27,5 @@ class PXMyPortal::TokenIssuer
     XPATH
     document.xpath(token) => [token]
     token or raise Error, token
-  end
-
-  def build_url(path, query: nil)
-    URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
   end
 end

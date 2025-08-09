@@ -13,48 +13,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require "http-cookie"
-require_relative "xdg"
-require_relative "cookie_store"
+require "set"
 
 class PXMyPortal::Cookie
-  def initialize(jar_path: nil, logger:)
-    @jar_path = jar_path || File.join(PXMyPortal::XDG::CACHE_DIR, "cookie-jar")
+  def initialize(logger:)
+    @set = Set.new
     @logger = logger
-
-    @jar             = HTTP::CookieJar.new
-    @debug_store = PXMyPortal::CookieStore.new
   end
 
-  def load
-    @jar.load(@jar_path) if File.exist?(@jar_path)
-  end
+  def accept(response)
+    fields = Set[*response.get_fields("Set-Cookie"),
+      *response.get_fields("set-cookie")]
 
-  # Previously accept_cookie.
-  def accept(response, url:)
-    fields = [*response.get_fields("Set-Cookie"), *response.get_fields("set-cookie")]
-    @debug_store.transaction do
-      @debug_store[url] ||= []
-      @debug_store[url].concat(fields)
+    fields.each do |field|
+      field.split(/; +/).each do |pair|
+        case pair
+        when "path=/",
+          "secure",
+          "HttpOnly",
+          "SameSite=Lax",
+          "selectedPage=pc",
+          /\Aexpires=/
+          next
+        end
+        key, = pair.split('=')
+        case key
+        when "ASP.NET_SessionId",
+          ".AspNet.ApplicationCookie",
+          "qs",
+          /\A__RequestVerificationToken_([A-Za-z0-9]+)/
+        else
+          raise PXMyPortal::Error, "unknown cookie entry #{pair.inspect}"
+        end
+        @set << pair
+      end
     end
-
-    fields.each { |value| @jar.parse(value, url) }
-    @jar.save(jar_path)
   end
 
-  # Previously cookie_jar_path.
-  def jar_path
-    @created_jar_path and return @created_jar_path
-    dir = File.dirname(@jar_path)
-    unless Dir.exist?(dir)
-      @logger.info("creating cache directory")
-      Dir.mkdir(dir)
-    end
-    @created_jar_path = @jar_path
-  end
-
-  # Previously provide_cookie.
-  def provide(request, url:)
-    request["Cookie"] = HTTP::Cookie.cookie_value(@jar.cookies(url))
+  def provide(request)
+    request["Cookie"] = @set.join(';')
   end
 end

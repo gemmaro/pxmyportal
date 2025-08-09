@@ -99,7 +99,6 @@ class PXMyPortal::Agent
   end
 
   def initialize(debug: false,
-                 cookie_jar_path: nil,
                  payslips_path: File.join(PXMyPortal::XDG::DATA_DIR,
                                           "pxmyportal", "payslips.yaml"),
                  company:,
@@ -127,7 +126,6 @@ class PXMyPortal::Agent
     @http = PXMyPortal::HTTPClient.new(
       debug: @debug_http,
       logger: @logger,
-      cookie_jar_path:,
     )
     @token_issuer = PXMyPortal::TokenIssuer.new(
       http: @http,

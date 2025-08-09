@@ -11,7 +11,7 @@ class PXMyPortal::DocumentDownloader
   end
 
   def post
-    @http.provide_cookie(@request, url: build_url(@path))
+    @http.provide_cookie(@request)
     @request.form_data = @form_data
     @logger.debug("request") { @request }
 
@@ -20,9 +20,5 @@ class PXMyPortal::DocumentDownloader
     @logger.debug("response") { response.to_hash }
     response.to_hash["content-type"] => ["application/pdf"]
     response.body
-  end
-
-  def build_url(path, query: nil)
-    URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
   end
 end
