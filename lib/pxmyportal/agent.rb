@@ -99,8 +99,7 @@ class PXMyPortal::Agent
   end
 
   def initialize(debug: false,
-                 payslips_path: File.join(PXMyPortal::XDG::DATA_DIR,
-                                          "pxmyportal", "payslips.yaml"),
+                 payslips_path: File.join(PXMyPortal::XDG::DATA_DIR, "payslips.yaml"),
                  company:,
                  user:,
                  password:,
