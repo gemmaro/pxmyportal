@@ -14,8 +14,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require "yaml"
-require "net/http"
-require "nokogiri"
 require "logger"
 require "set"
 require_relative "payslip"
@@ -97,16 +95,15 @@ class PXMyPortal::Agent
   end
 
   def payslips_for_page(page)
-    request = Net::HTTP::Get.new(page.path)
-    @debug and @logger.debug("request") { request }
-
-    @cookie.provide(request, url: build_url(page.path))
-    response = @http.request(request)
-    @debug and @logger.debug("response") { response }
-    response => Net::HTTPOK
-
-    File.write(page.cache_path, response.body)
-    page.rows(response.body)
+    data = PXMyPortal::PayslipList.new(
+      path: page.path,
+      debug: @debug,
+      logger: @logger,
+      cookie: @cookie,
+      http: @http,
+    ).get
+    File.write(page.cache_path, data)
+    page.rows(data)
       .map { |row| PXMyPortal::Payslip.from_row(row) }
   end
 
@@ -148,3 +145,4 @@ require_relative "http_client"
 require_relative "request_verification_token"
 require_relative "document_downloader"
 require_relative "authentication"
+require_relative "payslip_list"
