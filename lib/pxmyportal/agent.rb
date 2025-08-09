@@ -22,10 +22,7 @@ require_relative "page"
 
 class PXMyPortal::Agent
   def let_redirect(path: PXMyPortal::Page::BASEPATH)
-    @request_verification_token ||= PXMyPortal::RequestVerificationToken.new(
-      http: @http,
-      company: @company,
-    ).get
+    @request_verification_token ||= @token_issuer.get
 
     @page = PXMyPortal::Authentication.new(
       path:,
@@ -136,11 +133,15 @@ class PXMyPortal::Agent
       logger: @logger,
       cookie_jar_path:,
     )
+    @token_issuer = PXMyPortal::TokenIssuer.new(
+      http: @http,
+      company: @company,
+    )
   end
 end
 
 require_relative "http_client"
-require_relative "request_verification_token"
+require_relative "token_issuer"
 require_relative "document_downloader"
 require_relative "authentication"
 require_relative "payslip_list"

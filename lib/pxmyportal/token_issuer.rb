@@ -3,7 +3,7 @@ require "nokogiri"
 require_relative "http_client"
 require_relative "page"
 
-class PXMyPortal::RequestVerificationToken
+class PXMyPortal::TokenIssuer
   def initialize(http:, company:)
     @http = http
     @company = company
