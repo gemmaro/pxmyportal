@@ -39,7 +39,7 @@ class PXMyPortal::Page
 
   def cache_path
     @cache_path and return @cache_path
-    @cache_path = File.join(PXMyPortal::XDG::CACHE_DIR, "debug", "page", "#{@cache_filename}.html")
+    @cache_path = File.join(PXMyPortal::XDG::CACHE_DIR, "page", "#{@cache_filename}.html")
 
     dir = File.dirname(@cache_path)
     unless Dir.exist?(dir)

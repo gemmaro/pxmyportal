@@ -90,7 +90,6 @@ class PXMyPortal::Agent
   def payslips_for_page(page)
     data = PXMyPortal::PayslipList.new(
       path: page.path,
-      debug: @debug,
       logger: @logger,
       http: @http,
     ).get
@@ -119,7 +118,6 @@ class PXMyPortal::Agent
     @company         = company
     @user            = user
     @password        = password
-    @debug           = debug
     @payslips_path   = payslips_path
     @test            = test
     @payslip_dir     = payslip_dir
@@ -127,7 +125,9 @@ class PXMyPortal::Agent
     @debug_http      = debug_http
     @force           = force
 
-    @logger = Logger.new($stderr)
+    @logger = Logger.new($stderr, level: :info)
+    @logger.level = :debug if @debug
+
     @http = PXMyPortal::HTTPClient.new(
       debug: @debug_http,
       logger: @logger,
