@@ -98,10 +98,6 @@ class PXMyPortal::Agent
       .map { |row| PXMyPortal::Payslip.from_row(row) }
   end
 
-  def build_url(path, query: nil)
-    URI::HTTPS.build(host: PXMyPortal::HOST, path:, query:)
-  end
-
   def initialize(debug: false,
                  cookie_jar_path: nil,
                  payslips_path: File.join(PXMyPortal::XDG::DATA_DIR,
